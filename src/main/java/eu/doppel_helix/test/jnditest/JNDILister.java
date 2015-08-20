@@ -21,8 +21,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -32,15 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 public class JNDILister extends HttpServlet {
 
     private static final String indent = "    ";
-    
+
     @EJB
     private Sample sample;
-    
 
     @Override
     public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
         try {
-            String[] contexte = new String[] {"java:comp", "java:global", "java:app", "java:module"};
+            String[] contexte = new String[]{"java:comp", "java:global", "java:app", "java:module"};
             response.setContentType("text/plain;charset=UTF-8");
             InitialContext ic = new InitialContext();
             try (PrintWriter out = response.getWriter()) {
@@ -52,11 +49,19 @@ public class JNDILister extends HttpServlet {
                     out.append(" =========\n");
                     Context c = (Context) ic.lookup(context);
                     listContext("", out, c, context);
+
                 }
+                     // also look up the bean as expected in the local namespaces
+                out.append("=============  Direct look up of bean using the JNDI names ==================\n");
+                out.append("java:app/jnditest-1.0-SNAPSHOT/Sample = " + ic.lookup("java:app/jnditest-1.0-SNAPSHOT/Sample").toString() + "\n");
+                out.append("java:app/jnditest-1.0-SNAPSHOT/Sample!eu.doppel_helix.test.jnditest.ejb.Sample = " + ic.lookup("java:app/jnditest-1.0-SNAPSHOT/Sample!eu.doppel_helix.test.jnditest.ejb.Sample").toString() + "\n");
+                out.append("java:module/Sample = " + ic.lookup("java:module/Sample").toString() + "\n");
+                out.append("java:module/Sample = " + ic.lookup("java:module/Sample!eu.doppel_helix.test.jnditest.ejb.Sample").toString() + "\n");
             }
-        }   catch (NamingException ex) {
+        } catch (NamingException ex) {
             Logger.getLogger(JNDILister.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
     private static void listContext(String indent, PrintWriter out, Context ctx, String ctxName) throws NamingException {
@@ -64,11 +69,11 @@ public class JNDILister extends HttpServlet {
         while (ne.hasMore()) {
             Binding ncp = ne.next();
             String name = ncp.getName();
-            if(name.startsWith(ctxName)) {
+            if (name.startsWith(ctxName)) {
                 name = name.substring(ctxName.length() + 1);
             }
             out.println(indent + name + " => " + ncp.getClassName());
-            if(ncp.getObject() instanceof Context) {
+            if (ncp.getObject() instanceof Context) {
                 listContext(indent + JNDILister.indent, out, (Context) ncp.getObject(), ncp.getName());
             }
         }
