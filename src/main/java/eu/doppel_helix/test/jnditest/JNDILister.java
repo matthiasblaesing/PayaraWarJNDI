@@ -41,8 +41,10 @@ public class JNDILister extends HttpServlet {
             response.setContentType("text/plain;charset=UTF-8");
             InitialContext ic = new InitialContext();
             try (PrintWriter out = response.getWriter()) {
-                out.print("Sample woks: " + sample.hallo("Welt"));
-                out.print("\n\n");
+                Sample sampleFromLookup = (Sample) ic.lookup("java:module/Sample");
+                out.println("Sample woks: " + sample.hallo("Injection"));
+                out.println("JDNI Lookup works (java:module/Sample): " + sampleFromLookup.hallo("Lookup"));
+                out.print("\n");
                 for (String context : contexte) {
                     out.append("========= ");
                     out.append(context);
