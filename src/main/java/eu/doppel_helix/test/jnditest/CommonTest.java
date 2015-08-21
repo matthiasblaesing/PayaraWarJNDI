@@ -1,44 +1,17 @@
-
 package eu.doppel_helix.test.jnditest;
 
 import eu.doppel_helix.test.jnditest.ejb.Sample;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 
-
-@WebServlet(name = "JNDILister", urlPatterns = {"/lister"})
-public class JNDILister extends HttpServlet {
-
+public class CommonTest {
     private static final String indent = "    ";
-
-
-    @Override
-    public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-        try {
-
-            response.setContentType("text/plain;charset=UTF-8");
-
-            try (PrintWriter out = response.getWriter()) {
-                doTest(out);
-            }
-        } catch (NamingException ex) {
-            Logger.getLogger(JNDILister.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
+    
+    
     private static void listContext(String indent, PrintWriter out, Context ctx, String ctxName) throws NamingException {
         NamingEnumeration<Binding> ne = ctx.listBindings("");
         while (ne.hasMore()) {
@@ -49,7 +22,7 @@ public class JNDILister extends HttpServlet {
             }
             out.println(indent + name + " => " + ncp.getClassName());
             if (ncp.getObject() instanceof Context) {
-                listContext(indent + JNDILister.indent, out, (Context) ncp.getObject(), ncp.getName());
+                listContext(indent + CommonTest.indent, out, (Context) ncp.getObject(), ncp.getName());
             }
         }
     }
